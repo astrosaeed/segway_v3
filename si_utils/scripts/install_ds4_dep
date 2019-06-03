@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo -e "This script assumes that the PC is completely setup with a vector_ws.\n\n"
+
+read -r -p "Are you absolutely sure you want to continue? [y/N] " response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
+then
+    echo "Starting setup......"
+    sleep 1
+else
+    exit 1
+fi
+
+sudo apt-get install python-pip
+sudo pip install evdev
+sudo pip install pyudev
+
+sudo cp /home/$USER/segway_ws/src/segway_v3_robot/third_party_sensors/ds4drv/udev/50-ds4drv.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger

@@ -1,0 +1,11 @@
+#!/bin/bash          
+#
+# Shuts local display off
+# 
+# Patrick Hussey
+# Tues 25 Apr 2017 
+#
+# Use: ./display_off
+#
+export DISPLAY=:0
+xset dpms force off

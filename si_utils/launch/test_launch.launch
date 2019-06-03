@@ -1,0 +1,13 @@
+<launch>
+
+    <node pkg="sound_play" type="soundplay_node.py" name="sound_play" output="screen"/>
+    
+    <node pkg="movo_ros" type="movo_voice" name="movo_voice" output="screen"/>
+
+    <!-- Platform Manipulation -->
+    <node pkg="si_utils" type="timed_roslaunch"
+        args="5 si_utils subtest.launch"
+        name="subtest_bringup" output="screen"/> 
+        
+
+</launch>

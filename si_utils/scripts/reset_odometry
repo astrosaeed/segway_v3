@@ -1,0 +1,4 @@
+#!/bin/bash          
+
+rostopic pub -1 /segway/reset_odometry std_msgs/Bool True &
+exec "$@"

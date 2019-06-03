@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="voice_test" pkg ="si_utils" type="voice_test.py" output="screen"/>
+
+</launch>

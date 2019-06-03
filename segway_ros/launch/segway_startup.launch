@@ -1,0 +1,55 @@
+<!-- Launch file for Segway platform startup -->
+
+<launch>
+    <arg name="use_joystick" default="false"/>
+    <arg name="wd" default="false"/>
+
+	<!-- Segway System Watchdog is necessary for onboard PC -->
+	<node pkg="segway_ros" type="segway_wd" name="segway_wd" respawn="true" if="$(arg wd)"/>
+
+	        
+    <!-- Segway Base platform ROS Driver -->
+    <node pkg="segway_ros" ns="segway" type="segway_driver" name="segway_driver" respawn="true" output="screen">
+        <param name="platform" value="RMP_110" />
+    </node>
+
+    <!-- Platform specific robot state publisher and parameters -->
+    <include file="$(find segway_description)/launch/upload_rmp.launch"/>
+    
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+        <param name="publish_frequency" type="double" value="100.0" />
+    </node>
+  
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">[segway/rmp_joint_states,
+                                       segway/head/joint_states,
+                                       segway/right_arm/joint_states,
+                                       segway/right_gripper/joint_states]</rosparam>
+    </node>
+    
+    <!-- Platform specific configuration -->
+    <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam"
+        args="load /segway/segway_driver $(find segway_bringup)/launch/platform/config/segway_params.yaml" />
+    
+        
+    <group if="$(arg use_joystick)">
+        <node pkg="joy" type="joy_node" name="joy_node" if="$(optenv SEGWAY_HAS_ONBOARD_JOY false)">
+            <param name="dev" type="string" value="$(optenv SEGWAY_JOY_DEV /dev/input/js0)" />
+            <param name="deadzone" type="double" value="$(optenv SEGWAY_JOY_DEADZONE 0.1)" />
+            <param name="autorepeat_rate" type="double" value="50" />
+        </node>
+        
+        <node pkg="segway_ros" ns="segway" type="segway_teleop" name="segway_teleop" output="screen">
+            <rosparam file="$(find segway_bringup)/launch/teleop/config/$(optenv SEGWAY_JOY_MAPPING xbox360).yaml" command="load"/>
+        </node>
+        
+        <group ns="segway">
+            <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager"/>
+            <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet nodelet_manager">
+                <param name="yaml_cfg_file" value="$(find segway_bringup)/launch/teleop/config/cmd_vel_mux.yaml"/>
+            </node>
+        </group>
+    </group>
+    
+</launch>

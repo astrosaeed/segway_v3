@@ -1,0 +1,9 @@
+Header header
+float32 battery_state_of_charge_percent
+float32 battery_current_A0pk
+float32 battery_voltage_V
+float32 max_cell_temp_degc
+float32 max_pcba_temp_degc
+float32 max_cell_voltage_V
+float32 min_cell_voltage_V
+uint32  battery_interface_status_bits

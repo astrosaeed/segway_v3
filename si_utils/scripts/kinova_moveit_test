@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+"""--------------------------------------------------------------------
+COPYRIGHT 2016 Stanley Innovation Inc.
+
+Software License Agreement:
+
+The software supplied herewith by Stanley Innovation Inc. (the "Company") 
+for its licensed SI Vector Platform is intended and supplied to you, 
+the Company's customer, for use solely and exclusively with Stanley Innovation 
+products. The software is owned by the Company and/or its supplier, and is 
+protected under applicable copyright laws.  All rights are reserved. Any use in 
+violation of the foregoing restrictions may subject the user to criminal 
+sanctions under applicable laws, as well as to civil liability for the 
+breach of the terms and conditions of this license. The Company may 
+immediately terminate this Agreement upon your use of the software with 
+any products that are not Stanley Innovation products.
+
+The software was written using Python programming language.  Your use 
+of the software is therefore subject to the terms and conditions of the 
+OSI- approved open source license viewable at http://www.python.org/.  
+You are solely responsible for ensuring your compliance with the Python 
+open source license.
+
+You shall indemnify, defend and hold the Company harmless from any claims, 
+demands, liabilities or expenses, including reasonable attorneys fees, incurred 
+by the Company as a result of any claim or proceeding against the Company 
+arising out of or based upon: 
+
+(i) The combination, operation or use of the software by you with any hardware, 
+    products, programs or data not supplied or approved in writing by the Company, 
+    if such claim or proceeding would have been avoided but for such combination, 
+    operation or use.
+ 
+(ii) The modification of the software by or on behalf of you 
+
+(iii) Your use of the software.
+
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
+ WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+ TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+ IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ 
+ \file   init_sim.py
+
+ \brief  This node serves to setup simulation 
+
+ \Platform: Linux/ROS Indigo
+--------------------------------------------------------------------"""
+import rospy
+import rospkg
+import random
+from sensor_msgs.msg import JointState
+from std_srvs.srv import Empty,EmptyRequest
+
+from moveit_python import MoveGroupInterface
+from moveit_msgs.msg import MoveItErrorCodes
+from kinova_action_clients.gripper_action_client import GripperActionClient
+
+
+if __name__ == "__main__":
+    rospy.init_node('mico_moveit_test')
+    
+    #wait until gazebo is up and running
+    rospy.wait_for_message('/kinova/arm/joint_states',JointState)
+    rospy.sleep(0.5)
+    
+    move_group = MoveGroupInterface("arm","kinova_attach_link")
+    move_group.setPlannerId("RRTConnectkConfigDefault")
+    gripper = GripperActionClient()
+    
+    joints = ["elbow_joint",
+              "shoulder_lift_joint",
+              "shoulder_pan_joint",
+              "wrist_1_joint",
+              "wrist_2_joint",
+              "wrist_3_joint"]
+   
+
+    # This is a simulation so need to adjust gripper parameters
+    gripper_closed = 0.0
+    gripper_open = 0.165 
+
+    homed = [-1.764,-0.0865,-1.481,-2.0361,1.463,1.312]
+    tucked = [0,0,0,0,0,0]
+    success=False
+    while not rospy.is_shutdown() and not success:
+        result = move_group.moveToJointPosition(joints, homed, 0.05)
+        if result.error_code.val == MoveItErrorCodes.SUCCESS:
+            success=True
+    gripper.command(gripper_open)
+    
+    success=False
+    while not rospy.is_shutdown() and not success:
+        result = move_group.moveToJointPosition(joints, tucked, 0.05)
+        if result.error_code.val == MoveItErrorCodes.SUCCESS:
+            success=True
+    gripper.command(gripper_closed)
