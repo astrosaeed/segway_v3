@@ -66,8 +66,6 @@ namespace assisted_teleop {
       ros::Subscriber sub_;
       double collision_trans_speed_, collision_rot_speed_;
       bool diff_drive_;
-      bool vel_cmd_has_updated1;
-      bool vel_cmd_has_updated2;
   };
 };
 #endif

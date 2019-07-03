@@ -423,7 +423,7 @@ class RMP_IMU(object):
 
 class RMP_Dynamics:
     def __init__(self):
-            
+        self._use_platform_odometry = rospy.get_param('~use_platform_odometry',False)      
         self._MsgData = Dynamics()
         self._MsgPub = rospy.Publisher('/segway/feedback/dynamics', Dynamics, queue_size=10)
         self._jointStatePub = rospy.Publisher('rmp_joint_states', JointState, queue_size=10)
@@ -441,8 +441,12 @@ class RMP_Dynamics:
         self._jointStateMsg.header.frame_id = ''
   
         self._OdomData = Odometry()
-        self._OdomPub = rospy.Publisher('/segway/odometry/local_filtered', Odometry, queue_size=10)
-      
+        #self._OdomPub = rospy.Publisher('/segway/odometry/local_filtered', Odometry, queue_size=10)
+        if (False == self._use_platform_odometry):
+            self._OdomPub = rospy.Publisher('/segway/feedback/wheel_odometry', Odometry, queue_size=10)
+        #    rospy.Subscriber('/segway/odometry/local_filtered', Odometry, self._update_odom_yaw)
+        else:
+            self._OdomPub = rospy.Publisher('/segway/odometry/local_filtered', Odometry, queue_size=10)
         self._OdomData.header.frame_id = 'odom'
         self._OdomData.child_frame_id  = 'base_link'
         
