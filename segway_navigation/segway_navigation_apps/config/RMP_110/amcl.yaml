@@ -7,7 +7,7 @@
 # The map file is specified in launch/amcl.launch
 
 odom_frame_id:    /odom
-base_frame_id:    /segway/base_link
+base_frame_id:    /base_footprint
 global_frame_id:  /map
   
 # Overall filter parameters
